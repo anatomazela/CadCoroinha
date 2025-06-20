@@ -4,22 +4,34 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Página Inicial</title>
+    <title>Página Inicial</title>
     <style>
-        /* Seu CSS incorporado */
+        :root {
+            --amarelo-principal: #D6A24C;
+            --amarelo-hover: #A5753F;
+            --fundo-gradiente: linear-gradient(to bottom, #FDF6EC, #FCE9D4);
+            --fundo-claro: #FFF8F1;
+            --marrom: #5C4B2D;
+            --marrom-claro: #4f422f;
+            --bege-link: #4f472f;
+            --hover-link: #d1b25d;
+        }
+
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background: linear-gradient(to bottom, #ddd5a7, #E8FCFC);
+            background: var(--fundo-gradiente);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            color: var(--marrom);
         }
 
         header {
-            background-color: #d1c55d;
+            background-color: var(--amarelo-principal);
             padding: 20px;
             text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         header a {
@@ -28,10 +40,12 @@
             text-decoration: none;
             font-weight: bold;
             font-size: 18px;
+            transition: all 0.3s ease;
         }
 
         header a:hover {
             text-decoration: underline;
+            opacity: 0.9;
         }
 
         main {
@@ -43,44 +57,46 @@
         }
 
         footer {
-            background-color: #f0f9fa;
+            background-color: var(--fundo-claro);
             text-align: center;
             padding: 20px;
             font-size: 14px;
-            color: #70633f;
+            color: var(--marrom);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 30px; /* Espaçamento entre os links */
+            gap: 30px;
             margin-bottom: 15px;
         }
 
         footer a {
-            color: #2f4f4f;
+            color: var(--bege-link);
             text-decoration: none;
             font-weight: bold;
             transition: color 0.3s ease;
         }
 
         footer a:hover {
-            color: #5da7d1;
+            color: var(--hover-link);
             text-decoration: underline;
         }
 
         .welcome-box {
-            background-color: #f0f9fa;
+            background-color: var(--fundo-claro);
             padding: 40px 35px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            color: #2f4f4f;
+            color: var(--marrom-claro);
             max-width: 600px;
             text-align: center;
         }
 
         .welcome-box h1 {
             margin-bottom: 20px;
+            color: var(--marrom);
         }
 
         .welcome-box p {

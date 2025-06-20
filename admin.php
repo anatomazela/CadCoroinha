@@ -55,21 +55,31 @@ if (isset($_POST['submit'])) {
     <title>Administrador - Cadastrar Escala</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* ESTILOS GERAIS */
+    /* NOVA PALETA DE CORES INSPIRADA NA IGREJA */
+:root {
+    --amarelo-principal: #D6A24C;
+    --amarelo-hover: #A5753F;
+    --fundo-claro: #FFF8F1;
+    --fundo-gradiente: linear-gradient(to bottom, #FDF6EC, #FCE9D4);
+    --texto-escuro: #5C4B2D;
+}
+
+/* ESTILOS GERAIS */
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    background: linear-gradient(to bottom, #A7D8DD, #E8FCFC);
+    background: var(--fundo-gradiente);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 80px 20px 20px; /* Unificado */
+    padding: 80px 20px 20px;
+    color: var(--texto-escuro);
 }
 
-/* HEADER CONSISTENTE */
+/* HEADER */
 header {
-    background-color: #5da7d1;
+    background-color: var(--amarelo-principal);
     padding: 20px;
     text-align: center;
     position: fixed;
@@ -98,25 +108,25 @@ header {
     opacity: 0.9;
 }
 
-/* ESTILOS COMUNS AOS FORMULÁRIOS */
-.cadastro-box, .admin-box {
-    background-color: #f0f9fa;
+/* FORMULÁRIO */
+.admin-box {
+    background-color: var(--fundo-claro);
     padding: 40px;
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    color: #2f4f4f;
+    color: var(--texto-escuro);
     width: 100%;
-    max-width: 500px; /* Unificado */
+    max-width: 500px;
     margin: 20px 0;
 }
 
-.cadastro-box h1, .admin-box h1 {
+.admin-box h1 {
     text-align: center;
     margin-bottom: 30px;
-    color: #2f4f4f;
+    color: var(--texto-escuro);
 }
 
-.cadastro-box input, .admin-box input {
+.admin-box input {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
@@ -126,15 +136,15 @@ header {
     transition: border 0.2s ease;
 }
 
-.cadastro-box input:focus, .admin-box input:focus {
-    border-color: #5da7d1;
+.admin-box input:focus {
+    border-color: var(--amarelo-principal);
     outline: none;
-    box-shadow: 0 0 5px #5da7d1;
+    box-shadow: 0 0 5px var(--amarelo-principal);
 }
 
-.cadastro-box button, .admin-box button {
+.admin-box button {
     width: 100%;
-    background-color: #5da7d1;
+    background-color: var(--amarelo-principal);
     color: white;
     border: none;
     padding: 14px;
@@ -144,8 +154,8 @@ header {
     transition: background-color 0.3s ease;
 }
 
-.cadastro-box button:hover, .admin-box button:hover {
-    background-color: #3b85c3;
+.admin-box button:hover {
+    background-color: var(--amarelo-hover);
 }
 
 /* ESTILOS ESPECÍFICOS */
@@ -184,9 +194,9 @@ header {
     border: 1px solid #c3e6cb;
 }
 
-/* RESPONSIVIDADE UNIFICADA */
+/* RESPONSIVO */
 @media (max-width: 768px) {
-    .cadastro-box, .admin-box {
+    .admin-box {
         padding: 35px;
     }
 }
@@ -195,70 +205,51 @@ header {
     body {
         padding: 70px 15px 15px;
     }
-    
-    .cadastro-box, .admin-box {
-        padding: 42px 42px;
+
+    .admin-box {
+        padding: 30px 20px;
         border-radius: 10px;
     }
-    
-    .cadastro-box h1, .admin-box h1 {
+
+    .admin-box h1 {
         font-size: 24px;
         margin-bottom: 20px;
     }
-    
-    .cadastro-box input, .admin-box input {
+
+    .admin-box input {
         padding: 10px;
         font-size: 15px;
     }
-    .input-container {
-        position: relative;
-        margin-bottom: 15px;
-    }
-     /* Estilo base para todos os inputs */
-    input[type="date"],
-    input[type="time"],
-    input[type="text"] {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 16px;
-        background-color: white;
-    }
-    
-    /* Container para os campos especiais */
-    .input-date-container,
-    .input-time-container {
-        position: relative;
-    }
-    
-    /* Placeholder personalizado */
-    .date-placeholder,
-    .time-placeholder {
-        position: absolute;
-        left: 12px;
-        top: 12px;
-        color: #999;
-        pointer-events: none;
-        background-color: white;
-        padding: 0 5px;
-    }
-    
-    /* Estilo quando em foco */
-    input:focus {
-        border-color: #5da7d1;
-        outline: none;
-        box-shadow: 0 0 5px #5da7d1;
-    }
-    
-    /* Esconde o placeholder quando o input tem valor */
-    input[type="date"]:valid + .date-placeholder,
-    input[type="time"]:valid + .time-placeholder {
-        display: none;
-    }
 }
-    </style>
+
+/* ESTILO INPUTS COM PLACEHOLDER */
+.input-date-container,
+.input-time-container {
+    position: relative;
+}
+
+.date-placeholder,
+.time-placeholder {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    color: #999;
+    pointer-events: none;
+    background-color: white;
+    padding: 0 5px;
+}
+
+input:focus {
+    border-color: var(--amarelo-principal);
+    outline: none;
+    box-shadow: 0 0 5px var(--amarelo-principal);
+}
+
+input[type=\"date\"]:valid + .date-placeholder,
+input[type=\"time\"]:valid + .time-placeholder {
+    display: none;
+}
+</style>
 </head>
 <body>
     <header>

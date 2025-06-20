@@ -33,7 +33,6 @@ if (isset($_POST['submit'])) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -41,36 +40,76 @@ if (isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login</title>
     <style>
+        :root {
+            --amarelo-principal: #D6A24C;
+            --amarelo-hover: #A5753F;
+            --fundo-gradiente: linear-gradient(to bottom, #FDF6EC, #FCE9D4);
+            --fundo-claro: #FFF8F1;
+            --marrom: #5C4B2D;
+            --marrom-claro: #4f422f;
+            --hover-link: #d1b25d;
+        }
+
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background: linear-gradient(to bottom, #A7D8DD, #E8FCFC);
+            background: var(--fundo-gradiente);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: baseline;
-            padding: 80px 20px 20px; /* Espaço para o header e margens laterais */
-
+            padding: 80px 20px 20px;
+            color: var(--marrom);
         }
+
+        header {
+            background-color: var(--amarelo-principal);
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
         .login-box {
-            background-color: #f0f9fa;
+            background-color: var(--fundo-claro);
             padding: 40px 35px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            color: #2f4f4f;
             width: 100%;
             max-width: 450px;
+            margin-top: 20px;
+            color: var(--marrom-claro);
         }
+
         .login-box h1 {
             text-align: center;
             margin-bottom: 30px;
         }
+
         input, label {
             display: block;
             width: 100%;
             margin-bottom: 15px;
             font-size: 16px;
         }
+
         input[type="email"],
         input[type="password"] {
             padding: 12px;
@@ -78,86 +117,50 @@ if (isset($_POST['submit'])) {
             border-radius: 8px;
             box-sizing: border-box;
             transition: border 0.2s ease;
+            background-color: white;
         }
+
         input:focus {
-            border-color: #5da7d1;
+            border-color: var(--amarelo-principal);
             outline: none;
-            box-shadow: 0 0 5px #5da7d1;
+            box-shadow: 0 0 5px var(--amarelo-principal);
         }
+
         button {
             width: 100%;
-            background-color: #5da7d1;
+            background-color: var(--amarelo-principal);
             color: white;
             border: none;
             padding: 14px;
             font-size: 16px;
             border-radius: 8px;
+            cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         button:hover {
-            background-color: #3b85c3;
-            cursor: pointer;
+            background-color: var(--amarelo-hover);
         }
+
         .mensagem-erro {
             color: red;
+            font-weight: bold;
             text-align: center;
             margin-bottom: 15px;
         }
-         header {
-            background-color: #5da7d1;
-            padding: 20px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-        header a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        header a:hover {
-            text-decoration: underline;
-        }
-        .form-box {
-            margin-top: 50px; /* Para dar espaço para o cabeçalho fixo */
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 20px;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        }
-        input, button {
-            width: 100%;
-            margin: 8px 0;
-            padding: 10px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #5da7d1;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #4a8bc7;
-        }
-        .mensagem-erro {
-            color: red;
-            font-weight: bold;
+
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 35px 25px;
+            }
         }
     </style>
 </head>
-<header>
-    <a href="index.html">Início</a>
-</header>
-
 <body>
+    <header>
+        <a href="index.html">Início</a>
+    </header>
+
     <div class="login-box">
         <h1>Login</h1>
         <?php if (!empty($mensagem)) echo "<p class='mensagem-erro'>$mensagem</p>"; ?>

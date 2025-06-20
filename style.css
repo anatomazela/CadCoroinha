@@ -1,3 +1,13 @@
+/* NOVA PALETA DE CORES INSPIRADA NA IGREJA */
+:root {
+    --amarelo-principal: #D6A24C;
+    --amarelo-hover: #A5753F;
+    --fundo-claro: #FFF8F1;
+    --fundo-gradiente: linear-gradient(to bottom, #FDF6EC, #FCE9D4);
+    --texto-escuro: #5C4B2D;
+}
+
+/* ESTILOS GERAIS */
 * {
     box-sizing: border-box;
 }
@@ -5,47 +15,61 @@
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    background: linear-gradient(to bottom, #A7D8DD, #E8FCFC);
+    background: var(--fundo-gradiente);
     min-height: 100vh;
-    padding: 100px 10px 40px;
-}
-.conteudo-principal {
-    margin-top: 40px; /* Espaçamento extra entre o header e o conteúdo */
-}
-.espaco-header {
-    height: 120px; /* Ajuste o tamanho conforme a altura real do header */
+    padding: 80px 15px 30px;
+    color: var(--texto-escuro);
 }
 
-.form-box {
-    background-color: #f0f9fa;
-    padding: 40px 35px;
+header {
+    background-color: var(--amarelo-principal);
+    padding: 15px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+header a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+.conteudo-principal {
+    margin-top: 40px;
+}
+
+.espaco-header {
+    height: 120px;
+}
+
+.form-box, .form-box1, .tabela-box, .cadastro-box, .form-container {
+    background-color: var(--fundo-claro);
+    padding: 30px 25px;
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    color: #2f4f4f;
-    width: 100%;
-    max-width: 450px;
-    margin: 0 auto 30px;
-}
-
-.form-box1 {
-    background-color: #f0f9fa;
-    padding: 30px 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    color: #2f4f4f;
+    color: var(--texto-escuro);
     width: 95%;
+    margin: 80px auto 30px;
     max-width: 1200px;
-    margin: 110px auto 40px;
-    overflow-x: auto;
 }
 
-.form-box h1 {
+.form-box h1, .form-box1 h1, .tabela-box h1, .cadastro-box h1, .form-container h1 {
     text-align: center;
-    margin-bottom: 30px;
-    align-items: center;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
 }
 
-input, label {
+input, label, button {
     display: block;
     width: 100%;
     margin-bottom: 15px;
@@ -81,14 +105,13 @@ input[type="time"] {
 }
 
 input:focus {
-    border-color: #5da7d1;
+    border-color: var(--amarelo-principal);
     outline: none;
-    box-shadow: 0 0 5px #5da7d1;
+    box-shadow: 0 0 5px var(--amarelo-principal);
 }
 
 button {
-    width: 100%;
-    background-color: #5da7d1;
+    background-color: var(--amarelo-principal);
     color: white;
     border: none;
     padding: 14px;
@@ -98,40 +121,23 @@ button {
 }
 
 button:hover {
-    background-color: #3b85c3;
+    background-color: var(--amarelo-hover);
     cursor: pointer;
 }
 
-.mensagem-erro {
-    color: red;
-    text-align: center;
-    margin-bottom: 15px;
+button.tabela-botao {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-top: 5px;
+    background-color: var(--amarelo-principal);
 }
 
-.mensagem {
-    color: green;
-    text-align: center;
-    margin-bottom: 15px;
+button.tabela-botao:hover {
+    background-color: var(--amarelo-hover);
 }
 
-.tabela-box {
-    background-color: #f0f9fa;
-    padding: 30px 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    color: #2f4f4f;
-    width: 95%;
-    max-width: 1200px;
-margin: 40px auto;
-
-}
-
-.tabela-box h1 {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-table {
+.tabela-box table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 40px;
@@ -148,7 +154,7 @@ th, td {
 }
 
 th {
-    background-color: #5da7d1;
+    background-color: var(--amarelo-principal);
     color: white;
 }
 
@@ -168,25 +174,20 @@ ul.participantes li {
 .funcao-box {
     min-width: 150px;
     font-weight: 600;
-    color: #0077be;
+    color: var(--amarelo-hover);
     word-break: break-word;
 }
 
-button.tabela-botao {
-    background-color: #5da7d1;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 5px;
-    width: auto;
-    font-size: 14px;
-    transition: background-color 0.25s ease;
+.mensagem-erro {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
-button.tabela-botao:hover {
-    background-color: #3b85c3;
+.mensagem {
+    color: green;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
 @media (max-width: 900px) {
@@ -208,10 +209,10 @@ button.tabela-botao:hover {
 
 @media (max-width: 600px) {
     body {
-        padding: 100px 5px 40px;
+        padding: 70px 10px 20px;
     }
 
-    .form-box, .form-box1, .tabela-box {
+    .form-box, .form-box1, .tabela-box, .cadastro-box {
         padding: 15px 10px;
         width: 100%;
         max-width: 100%;
@@ -234,229 +235,4 @@ button.tabela-botao:hover {
     ul.participantes {
         max-height: 80px;
     }
-}
-
-.form-box1 > h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    color: #2f4f4f;
-    font-size: 1.8rem;
-}
-
-header {
-    background-color: #5da7d1;
-    padding: 20px;
-    text-align: center;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-/* CORES PRINCIPAIS */
-:root {
-    --azul-claro: #5da7d1;
-    --azul-escuro: #3b85c3;
-    --fundo-claro: #f0f9fa;
-    --fundo-gradiente: linear-gradient(to bottom, #A7D8DD, #E8FCFC);
-    --texto-escuro: #2f4f4f;
-}
-
-/* ESTILOS GERAIS */
-body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    background: var(--fundo-gradiente);
-    min-height: 100vh;
-    padding: 80px 15px 30px;
-}
-
-/* FORMULÁRIO DE CADASTRO */
-.cadastro-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 110px);
-    padding: 20px;
-}
-
-.cadastro-box {
-    background-color: var(--fundo-claro);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 450px;
-    margin: 0 auto;
-}
-
-.cadastro-box h1 {
-    color: var(--texto-escuro);
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 1.8rem;
-}
-
-.cadastro-box input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-}
-
-.cadastro-box button {
-    background-color: var(--azul-claro);
-    color: white;
-    border: none;
-    padding: 14px;
-    width: 100%;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.cadastro-box button:hover {
-    background-color: var(--azul-escuro);
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    margin: 15px 0;
-    cursor: pointer;
-}
-/* Estilos base consistentes com o login */
-.form-container {
-    background-color: #f0f9fa;
-    padding: 30px 25px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    color: #2f4f4f;
-    width: 95%;
-    max-width: 450px;
-    margin: 80px auto 30px;
-}
-
-.form-container h1 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #2f4f4f;
-}
-
-input, button {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #5da7d1;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #3b85c3;
-}
-
-/* Header consistente */
-header {
-    background-color: #5da7d1;
-    padding: 15px;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-header a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-header a:hover {
-    text-decoration: underline;
-}
-
-/* Espaçamento para o header fixo */
-body {
-    padding-top: 70px;
-}
-
-.checkbox-label input {
-    width: auto;
-    margin-right: 10px;
-    margin-bottom: 0;
-}
-
-/* HEADER */
-header {
-    background-color: var(--azul-claro);
-    padding: 15px;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    text-align: center;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-header a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-/* RESPONSIVO */
-@media (max-width: 600px) {
-    body {
-        padding: 70px 10px 20px;
-    }
-    
-    .cadastro-box {
-        padding: 20px;
-    }
-}
-.cadastro-box {
-    background-color: #f0f9fa;
-    padding: 30px 25px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    color: #2f4f4f;
-    width: 95%;
-    max-width: 450px;
-    margin: 80px auto 30px;
-    position: relative;
-    z-index: 1;
-}
-header a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-header a:hover {
-    text-decoration: underline;
 }
