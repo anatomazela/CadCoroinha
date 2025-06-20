@@ -48,7 +48,9 @@ if (isset($_POST['submit'])) {
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: baseline;
+            padding: 80px 20px 20px; /* Espaço para o header e margens laterais */
+
         }
         .login-box {
             background-color: #f0f9fa;
@@ -101,8 +103,60 @@ if (isset($_POST['submit'])) {
             text-align: center;
             margin-bottom: 15px;
         }
+         header {
+            background-color: #5da7d1;
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        header a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+        .form-box {
+            margin-top: 50px; /* Para dar espaço para o cabeçalho fixo */
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        input, button {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #5da7d1;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4a8bc7;
+        }
+        .mensagem-erro {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
+<header>
+    <a href="index.html">Início</a>
+</header>
+
 <body>
     <div class="login-box">
         <h1>Login</h1>

@@ -113,11 +113,11 @@ foreach ($dados as $linha) {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escala das Missas</title>
     <style>
         body {
@@ -126,68 +126,166 @@ foreach ($dados as $linha) {
             background: linear-gradient(to bottom, #A7D8DD, #E8FCFC);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+        padding: 80px 20px 20px; /* Espaço para o header e margens laterais */
         }
+
+        /* HEADER IDÊNTICO AO LOGIN */
+        header {
+            background-color: #5da7d1;
+            padding: 20px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-link {
+            color: white !important;
+            text-decoration: none !important;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        .header-link:hover {
+            text-decoration: underline !important;
+            opacity: 0.9;
+        }
+
+        /* CONTAINER PRINCIPAL - IDÊNTICO AO LOGIN */
         .tabela-box {
             background-color: #f0f9fa;
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
             color: #2f4f4f;
-            width: 95%;
-            max-width: 1200px;
-            overflow-x: auto;
-        }
-        h1 {
-            text-align: center;
+            width: 90%;
+            max-width: 800px;
             margin-bottom: 30px;
         }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2f4f4f;
+        }
+
+        /* ESTILOS ORIGINAIS DA TABELA (MANTIDOS) */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
+
         th, td {
             border: 1px solid #ccc;
             padding: 12px;
             text-align: center;
             vertical-align: middle;
         }
+
         th {
             background-color: #5da7d1;
             color: white;
         }
-        button {
-            background-color: #5da7d1;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 5px;
+
+        ul.participantes {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
-        button:hover {
-            background-color: #3b85c3;
+
+        ul.participantes li {
+            margin: 5px 0;
         }
+
+        .funcao-box {
+            min-width: 120px;
+        }
+
         .mensagem {
             color: green;
             text-align: center;
             margin-bottom: 15px;
         }
-        ul.participantes {
-            list-style: none;
-            padding: 0;
-            margin: 5px 0;
+
+        /* BOTÕES - IDÊNTICOS AO LOGIN */
+        button {
+            width: 100%;
+            background-color: #5da7d1;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 5px;
         }
-        ul.participantes li {
-            margin: 2px 0;
+
+        button:hover {
+            background-color: #3b85c3;
         }
-        .funcao-box {
-            min-width: 150px;
+
+        /* RESPONSIVIDADE PARA CELULAR */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+            
+            .tabela-box {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            button {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            header {
+                padding: 15px 0;
+            }
+            
+            .header-link {
+                font-size: 16px;
+            }
+        }
+
+        /* ESTILO ORIGINAL DOS TÍTULOS DAS ESCALAS */
+        h3 {
+            margin: 20px 0 10px 0;
+            color: #2f4f4f;
+            text-align: center;
         }
     </style>
 </head>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="header-link">Início</a>
+    </div>
+</header>
+
+
 <body>
     <div class="tabela-box">
         <h1>Escala das Missas</h1>
