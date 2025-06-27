@@ -17,7 +17,7 @@ if (isset($_POST['submit'])) {
         $mensagem = "Por favor, preencha todos os campos.";
     } else {
         try {
-            // Verificar se email já existe
+
             $sqlCheck = "SELECT id FROM users WHERE email = ?";
             $stmtCheck = $pdo->prepare($sqlCheck);
             $stmtCheck->execute([$email]);
@@ -27,13 +27,11 @@ if (isset($_POST['submit'])) {
             } else {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-                // Inserir dados no users
                 $sqlInsertUser = "INSERT INTO users (username, email, password, is_admin) 
                                 VALUES (?, ?, ?, ?)";
                 $stmtUser = $pdo->prepare($sqlInsertUser);
                 $stmtUser->execute([$nome, $email, $senhaHash, $admin]);
 
-                // Inserir dados no new_table (se ainda existir)
                 $sqlInsertNew = "INSERT INTO new_table (nome, email, telefone, nascimento, endereco) 
                                VALUES (?, ?, ?, ?, ?)";
                 $stmtNew = $pdo->prepare($sqlInsertNew);
@@ -55,7 +53,7 @@ if (isset($_POST['submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style.css">
     <style>
         :root {
     --amarelo-principal: #D6A24C;

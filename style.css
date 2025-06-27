@@ -179,13 +179,13 @@ ul.participantes li {
 }
 
 .mensagem-erro {
-    color: red;
+    color: rgb(255, 0, 0);
     text-align: center;
     margin-bottom: 15px;
 }
 
 .mensagem {
-    color: green;
+    color: rgb(8, 212, 8);
     text-align: center;
     margin-bottom: 15px;
 }
