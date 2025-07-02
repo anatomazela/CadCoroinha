@@ -63,7 +63,6 @@ if (isset($_POST['submit'])) {
     --texto-escuro: #5C4B2D;
 }
 
-/* ESTILO GERAL */
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -76,7 +75,6 @@ body {
     color: var(--texto-escuro);
 }
 
-/* HEADER */
 header {
     background-color: var(--amarelo-principal);
     padding: 20px;
@@ -107,7 +105,6 @@ header {
     opacity: 0.9;
 }
 
-/* FORMULÁRIO */
 .cadastro-box {
     background-color: var(--fundo-claro);
     padding: 40px 40px;
@@ -180,7 +177,6 @@ header {
     border: 1px solid #f5c6cb;
 }
 
-/* INPUTS ESPECIAIS */
 .input-date-container {
     position: relative;
 }
@@ -205,7 +201,6 @@ input[type="date"]:valid + .date-placeholder {
     display: none;
 }
 
-/* RESPONSIVO */
 @media (max-width: 768px) {
     .cadastro-box {
         padding: 35px;

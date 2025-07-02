@@ -86,3 +86,5 @@ ALTER TABLE `participantes_funcoes`
 
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;      
+
+  Git hub mnadar attlz

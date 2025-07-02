@@ -14,7 +14,6 @@ if (!$nome_participante_logado) {
         $mensagem = "Função inválida.";
     } else {
         try {
-            // Busca o id_escala da função
             $sqlEscala = "SELECT id_escala FROM funcoes WHERE id = ?";
             $stmtEscala = $pdo->prepare($sqlEscala);
             $stmtEscala->execute([$id_funcao]);
@@ -23,7 +22,6 @@ if (!$nome_participante_logado) {
             if (!$id_escala) {
                 $mensagem = "Ainda não há escalas cadastradas.";
             } else {
-                // Verifica se o participante já reservou nessa escala
                 $sqlVerifica = "
                     SELECT COUNT(*) FROM participantes_funcoes pf
                     JOIN funcoes f ON pf.id_funcao = f.id
@@ -36,7 +34,6 @@ if (!$nome_participante_logado) {
                 if ($jaReservou > 0) {
                     $mensagem = "Você já reservou uma função nesta escala e não pode reservar outra.";
                 } else {
-                    // Busca o nome da função
                     $sqlFuncao = "SELECT funcao FROM funcoes WHERE id = ?";
                     $stmtFuncao = $pdo->prepare($sqlFuncao);
                     $stmtFuncao->execute([$id_funcao]);
@@ -48,13 +45,11 @@ if (!$nome_participante_logado) {
                         $funcaoLower = mb_strtolower(trim($funcao), 'UTF-8');
 
                         if ($funcaoLower === 'não participarei') {
-                            // Insere diretamente a reserva
                             $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
                             $stmtInsere = $pdo->prepare($sqlInsere);
                             $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
                             $mensagem = "Função 'Não participarei' reservada com sucesso!";
                         } else {
-                            // Verifica se a função já foi reservada
                             $sqlConta = "SELECT COUNT(*) FROM participantes_funcoes WHERE id_funcao = ?";
                             $stmtConta = $pdo->prepare($sqlConta);
                             $stmtConta->execute([$id_funcao]);
@@ -78,7 +73,6 @@ if (!$nome_participante_logado) {
     }
 }
 
-// Busca os dados para exibir
 $sql = "
 SELECT 
     e.id AS escala_id, e.data_missa, e.horario, e.descricao,
@@ -267,12 +261,73 @@ foreach ($dados as $linha) {
                 font-size: 16px;
             }
         }
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: var(--fundo-claro);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal h3 {
+    color: var(--marrom);
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-buttons button:first-child {
+    background-color: var(--amarelo-principal);
+    color: white;
+}
+
+.modal-buttons button:first-child:hover {
+    background-color: var(--amarelo-hover);
+}
+
+.modal-buttons button:last-child {
+    background-color: #f0f0f0;
+    color: var(--marrom);
+}
+
+.modal-buttons button:last-child:hover {
+    background-color: #e0e0e0;
+}
     </style>
 </head>
 <body>
 <header>
     <div class="header-content">
         <a href="index.html" class="header-link">Início</a>
+        <a href="logout.php" class="header-link" onclick="openLogoutModal(event)">Sair</a>
     </div>
 </header>
 
@@ -349,6 +404,27 @@ foreach ($dados as $linha) {
         </table>
     <?php endforeach; ?>
 </div>
+<div id="logoutModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Tem certeza que deseja sair?</h3>
+        <div class="modal-buttons">
+            <button onclick="confirmLogout()">Sim, sair</button>
+            <button onclick="closeModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+<script>
+    function openLogoutModal(event) {
+        event.preventDefault(); 
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+    function confirmLogout() {
+        window.location.href = 'logout.php';
+    }
+    function closeModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+</script>
 
 </body>
 </html>

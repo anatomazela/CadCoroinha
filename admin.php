@@ -2,7 +2,6 @@
 include_once('config.php');
 session_start();
 
-// Verificar se é admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     header('Location: login.php');
     exit();
@@ -22,13 +21,11 @@ if (isset($_POST['submit'])) {
         try {
             $pdo->beginTransaction();
 
-            // Inserir a escala
             $sqlEscala = "INSERT INTO escalas (data_missa, horario, descricao) VALUES (?, ?, ?)";
             $stmtEscala = $pdo->prepare($sqlEscala);
             $stmtEscala->execute([$data_missa, $horario, $descricao]);
             $id_escala = $pdo->lastInsertId();
 
-            // Inserir as funções
             $sqlFuncao = "INSERT INTO funcoes (id_escala, funcao) VALUES (?, ?)";
             $stmtFuncao = $pdo->prepare($sqlFuncao);
 
@@ -55,7 +52,6 @@ if (isset($_POST['submit'])) {
     <title>Administrador - Cadastrar Escala</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-    /* NOVA PALETA DE CORES INSPIRADA NA IGREJA */
 :root {
     --amarelo-principal: #D6A24C;
     --amarelo-hover: #A5753F;
@@ -64,7 +60,6 @@ if (isset($_POST['submit'])) {
     --texto-escuro: #5C4B2D;
 }
 
-/* ESTILOS GERAIS */
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -77,7 +72,6 @@ body {
     color: var(--texto-escuro);
 }
 
-/* HEADER */
 header {
     background-color: var(--amarelo-principal);
     padding: 20px;
@@ -108,7 +102,6 @@ header {
     opacity: 0.9;
 }
 
-/* FORMULÁRIO */
 .admin-box {
     background-color: var(--fundo-claro);
     padding: 40px;
@@ -158,7 +151,6 @@ header {
     background-color: var(--amarelo-hover);
 }
 
-/* ESTILOS ESPECÍFICOS */
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -171,7 +163,6 @@ header {
     margin-right: 10px;
 }
 
-/* MENSAGENS */
 .mensagem-erro {
     color: #d9534f;
     font-weight: bold;
@@ -194,7 +185,6 @@ header {
     border: 1px solid #c3e6cb;
 }
 
-/* RESPONSIVO */
 @media (max-width: 768px) {
     .admin-box {
         padding: 35px;
@@ -222,7 +212,6 @@ header {
     }
 }
 
-/* ESTILO INPUTS COM PLACEHOLDER */
 .input-date-container,
 .input-time-container {
     position: relative;
@@ -249,14 +238,73 @@ input[type=\"date\"]:valid + .date-placeholder,
 input[type=\"time\"]:valid + .time-placeholder {
     display: none;
 }
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: var(--fundo-claro);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal h3 {
+    color: var(--marrom);
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-buttons button:first-child {
+    background-color: var(--amarelo-principal);
+    color: white;
+}
+
+.modal-buttons button:first-child:hover {
+    background-color: var(--amarelo-hover);
+}
+
+.modal-buttons button:last-child {
+    background-color: #f0f0f0;
+    color: var(--marrom);
+}
+
+.modal-buttons button:last-child:hover {
+    background-color: #e0e0e0;
+}
 </style>
 </head>
 <body>
     <header>
         <div class="header-content">
             <a href="index.html" class="header-link">Início</a>
-            <a href="logout.php" class="header-link">Sair</a>
-        </div>
+        <a href="logout.php" class="header-link" onclick="openLogoutModal(event)">Sair</a>
     </header>
 
     <div class="admin-box">
@@ -275,14 +323,12 @@ input[type=\"time\"]:valid + .time-placeholder {
         <label for="data_missa" class="date-placeholder">Data da Missa</label>
     </div>
     
-    <!-- Campo de Horário -->
     <div class="input-time-container">
         <input type="time" name="horario" id="horario" required
                onchange="this.nextElementSibling.style.display='none'">
         <label for="horario" class="time-placeholder">Horário</label>
     </div>
 
-    <!-- Campo normal de texto -->
     <input type="text" name="descricao" placeholder="Descrição da Missa" required>
 
             <div style="margin: 20px 0;">
@@ -302,5 +348,26 @@ input[type=\"time\"]:valid + .time-placeholder {
             <button type="submit" name="submit">Cadastrar Escala</button>
         </form>
     </div>
+<div id="logoutModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Tem certeza que deseja sair?</h3>
+        <div class="modal-buttons">
+            <button onclick="confirmLogout()">Sim, sair</button>
+            <button onclick="closeModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+<script>
+    function openLogoutModal(event) {
+        event.preventDefault(); 
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+    function confirmLogout() {
+        window.location.href = 'logout.php';
+    }
+    function closeModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+</script>
 </body>
 </html>

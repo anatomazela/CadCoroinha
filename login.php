@@ -38,7 +38,7 @@ if (isset($_POST['submit'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login</title>
+    <title> Login </title>
     <style>
         :root {
             --amarelo-principal: #D6A24C;
