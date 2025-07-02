@@ -172,11 +172,14 @@
     </style>
 </head>
 <body>
-    <header>
-        <a href="cadastro.php">Cadastro</a>
-        <a href="login.php">Login</a>
-        <a href="user.php">Usuários</a>
-    </header>
+  <header>
+    <a href="cadastro.php" id="linkCadastro">Cadastro</a>
+    <a href="login.php" id="linkLogin">Login</a>
+    <a href="user.php" id="linkUser">Usuários</a>
+    <a href="logout.php" class="header-link" id="linkLogout" onclick="openLogoutModal(event)">Sair</a>
+</header>
+
+
     <main>
         <div class="welcome-box">
             <img src="/CadCoroinha/img/imagem.png" class="welcome-image">
@@ -205,6 +208,21 @@
         document.getElementById('logoutModal').style.display = 'none';
     }
 </script>
+<script>
+    fetch('status.php')
+        .then(response => response.text())
+        .then(status => {
+            if (status === 'logado') {
+                document.getElementById('linkCadastro')?.remove();
+                document.getElementById('linkLogin')?.remove();
+            } else {
+
+                document.getElementById('linkUser')?.remove();
+                document.getElementById('linkLogout')?.remove();
+            }
+        });
+</script>
+
     <footer>
         <div class="footer-links">
             <a href="admin.php">Coordenação</a>

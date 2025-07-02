@@ -224,7 +224,6 @@ header {
     top: 12px;
     color: #999;
     pointer-events: none;
-    background-color: white;
     padding: 0 5px;
 }
 
@@ -298,6 +297,66 @@ input[type=\"time\"]:valid + .time-placeholder {
 .modal-buttons button:last-child:hover {
     background-color: #e0e0e0;
 }
+.input-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+input[type="date"]::before,
+input[type="time"]::before {
+    content: attr(placeholder);
+    position: absolute;
+    color: #999;
+    left: 12px;
+    top: 12px;
+    pointer-events: none;
+}
+
+input[type="date"]:focus::before,
+input[type="time"]:focus::before,
+input[type="date"]:valid::before,
+input[type="time"]:valid::before {
+    display: none;
+}
+
+input[type="date"],
+input[type="time"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus {
+    border-color: var(--amarelo-principal);
+    outline: none;
+    box-shadow: 0 0 5px var(--amarelo-principal);
+}
+.input-simples {
+    margin-bottom: 15px;
+}
+
+.input-simples input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.input-simples input:focus {
+    border-color: var(--amarelo-principal);
+    outline: none;
+    box-shadow: 0 0 5px var(--amarelo-principal);
+}
+
+/* Esconde o ícone do calendário no Chrome */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: none;
+    display: none;
+}
 </style>
 </head>
 <body>
@@ -317,18 +376,15 @@ input[type=\"time\"]:valid + .time-placeholder {
         <?php endif; ?>
 
         <form method="POST" action="">
-        <div class="input-date-container">
-        <input type="date" name="data_missa" id="data_missa" required
-               onchange="this.nextElementSibling.style.display='none'">
-        <label for="data_missa" class="date-placeholder">Data da Missa</label>
-    </div>
-    
-    <div class="input-time-container">
-        <input type="time" name="horario" id="horario" required
-               onchange="this.nextElementSibling.style.display='none'">
-        <label for="horario" class="time-placeholder">Horário</label>
-    </div>
+      <div class="input-simples">
+    <input type="text" class="campo-data" placeholder="Data da Missa" 
+           onfocus="(this.type='date')" required>
+</div>
 
+<div class="input-simples">
+    <input type="text" class="campo-horario" placeholder="Horário" 
+           onfocus="(this.type='time')" required>
+</div>
     <input type="text" name="descricao" placeholder="Descrição da Missa" required>
 
             <div style="margin: 20px 0;">
@@ -368,6 +424,39 @@ input[type=\"time\"]:valid + .time-placeholder {
     function closeModal() {
         document.getElementById('logoutModal').style.display = 'none';
     }
+    
 </script>
+<script>
+// Mostra o picker ao clicar no campo de data
+document.getElementById('data_missa').addEventListener('click', function() {
+    this.showPicker();
+});
+
+// Remove placeholders quando há valor
+document.querySelectorAll('input[type="date"], input[type="time"]').forEach(input => {
+    input.addEventListener('change', function() {
+        if(this.value) {
+            this.setAttribute('data-filled', 'true');
+        } else {
+            this.removeAttribute('data-filled');
+        }
+    });
+    
+    // Verifica se já tem valor ao carregar a página
+    if(input.value) {
+        input.setAttribute('data-filled', 'true');
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Mantém o placeholder visível quando perde o foco sem valor
+    document.querySelectorAll('.campo-data, .campo-horario').forEach(input => {
+        input.addEventListener('blur', function() {
+            if(!this.value) {
+                this.type = 'text';
+            }
+        });
+    });
+});
+</script>   
 </body>
 </html>

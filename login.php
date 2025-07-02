@@ -17,6 +17,7 @@ if (isset($_POST['submit'])) {
         if ($user && password_verify($senha, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['tipo'] = $usuario['tipo'];
             $_SESSION['is_admin'] = $user['is_admin'];
 
             if ($user['is_admin']) {

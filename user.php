@@ -7,7 +7,17 @@ $nome_participante_logado = $_SESSION['username'] ?? null;
 
 if (!$nome_participante_logado) {
     $mensagem = "Você precisa estar logado para reservar.";
-} else if (isset($_POST['reservar'])) {
+    header('Location: login.php');
+    exit();
+}
+
+// Obter o tipo do usuário (acólito ou coroinha)
+$sqlTipo = "SELECT tipo FROM new_table WHERE NOME = ?";
+$stmtTipo = $pdo->prepare($sqlTipo);
+$stmtTipo->execute([$nome_participante_logado]);
+$tipo_usuario = $stmtTipo->fetchColumn();
+
+if (isset($_POST['reservar'])) {
     $id_funcao = $_POST['id_funcao'] ?? '';
 
     if (!$id_funcao) {
@@ -50,18 +60,30 @@ if (!$nome_participante_logado) {
                             $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
                             $mensagem = "Função 'Não participarei' reservada com sucesso!";
                         } else {
-                            $sqlConta = "SELECT COUNT(*) FROM participantes_funcoes WHERE id_funcao = ?";
-                            $stmtConta = $pdo->prepare($sqlConta);
-                            $stmtConta->execute([$id_funcao]);
-                            $contagem = $stmtConta->fetchColumn();
+                            // Verificar se a função corresponde ao tipo do usuário
+                            $funcaoValida = false;
+                            if ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
+                                $funcaoValida = true;
+                            } elseif ($tipo_usuario === 'coroinha' && (strpos($funcaoLower, 'coroinha') !== false)) {
+                                $funcaoValida = true;
+                            }
 
-                            if ($contagem > 0) {
-                                $mensagem = "Essa função já foi reservada.";
+                            if (!$funcaoValida) {
+                                $mensagem = "Esta função não está disponível para o seu tipo de participante.";
                             } else {
-                                $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
-                                $stmtInsere = $pdo->prepare($sqlInsere);
-                                $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
-                                $mensagem = "Função reservada com sucesso!";
+                                $sqlConta = "SELECT COUNT(*) FROM participantes_funcoes WHERE id_funcao = ?";
+                                $stmtConta = $pdo->prepare($sqlConta);
+                                $stmtConta->execute([$id_funcao]);
+                                $contagem = $stmtConta->fetchColumn();
+
+                                if ($contagem > 0) {
+                                    $mensagem = "Essa função já foi reservada.";
+                                } else {
+                                    $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
+                                    $stmtInsere = $pdo->prepare($sqlInsere);
+                                    $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
+                                    $mensagem = "Função reservada com sucesso!";
+                                }
                             }
                         }
                     }
@@ -218,6 +240,10 @@ foreach ($dados as $linha) {
         button:hover {
             background-color: var(--amarelo-hover);
         }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
         .mensagem {
             color: #d9534f;
             font-weight: bold;
@@ -261,66 +287,66 @@ foreach ($dados as $linha) {
                 font-size: 16px;
             }
         }
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
 
-.modal-content {
-    background-color: var(--fundo-claro);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-}
+        .modal-content {
+            background-color: var(--fundo-claro);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
 
-.modal h3 {
-    color: var(--marrom);
-    margin-bottom: 20px;
-}
+        .modal h3 {
+            color: var(--marrom);
+            margin-bottom: 20px;
+        }
 
-.modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
 
-.modal-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
 
-.modal-buttons button:first-child {
-    background-color: var(--amarelo-principal);
-    color: white;
-}
+        .modal-buttons button:first-child {
+            background-color: var(--amarelo-principal);
+            color: white;
+        }
 
-.modal-buttons button:first-child:hover {
-    background-color: var(--amarelo-hover);
-}
+        .modal-buttons button:first-child:hover {
+            background-color: var(--amarelo-hover);
+        }
 
-.modal-buttons button:last-child {
-    background-color: #f0f0f0;
-    color: var(--marrom);
-}
+        .modal-buttons button:last-child {
+            background-color: #f0f0f0;
+            color: var(--marrom);
+        }
 
-.modal-buttons button:last-child:hover {
-    background-color: #e0e0e0;
-}
+        .modal-buttons button:last-child:hover {
+            background-color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -368,8 +394,18 @@ foreach ($dados as $linha) {
                     $funcaoLower = mb_strtolower(trim($funcao['funcao']), 'UTF-8');
                     $funcaoNormal = $funcaoLower !== 'não participarei';
                     $jaReservada = $funcaoNormal && count($funcao['participantes']) > 0;
+                    
+                    // Verificar se a função é compatível com o tipo do usuário
+                    $funcaoCompativel = false;
+                    if ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
+                        $funcaoCompativel = true;
+                    } elseif ($tipo_usuario === 'coroinha' && strpos($funcaoLower, 'coroinha') !== false) {
+                        $funcaoCompativel = true;
+                    } elseif ($funcaoLower === 'não participarei') {
+                        $funcaoCompativel = true;
+                    }
 
-                    $mostrarBotao = !$usuarioJaReservou && (!$jaReservada || !$funcaoNormal);
+                    $mostrarBotao = !$usuarioJaReservou && (!$jaReservada || !$funcaoNormal) && $funcaoCompativel;
                     ?>
                     <tr>
                         <td><?= htmlspecialchars($funcao['funcao']) ?></td>
@@ -393,6 +429,8 @@ foreach ($dados as $linha) {
                             <?php else: ?>
                                 <?php if ($usuarioJaReservou): ?>
                                     <em>Você já reservou uma função nesta escala</em>
+                                <?php elseif (!$funcaoCompativel): ?>
+                                    <em>Função não disponível para seu tipo</em>
                                 <?php else: ?>
                                     <em>Essa função já foi reservada.</em>
                                 <?php endif; ?>
