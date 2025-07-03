@@ -10,6 +10,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
 $mensagem = '';
 
 if (isset($_POST['submit'])) {
+    // Corrigir os nomes dos campos para corresponder ao HTML
     $data_missa = $_POST['data_missa'] ?? '';
     $horario = $_POST['horario'] ?? '';
     $descricao = $_POST['descricao'] ?? '';
@@ -108,7 +109,7 @@ header {
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     color: var(--texto-escuro);
-    width: 100%;
+    width: 95%;
     max-width: 500px;
     margin: 20px 0;
 }
@@ -120,7 +121,7 @@ header {
 }
 
 .admin-box input {
-    width: 100%;
+    width: 95%;
     padding: 12px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
@@ -321,7 +322,7 @@ input[type="time"]:valid::before {
 
 input[type="date"],
 input[type="time"] {
-    width: 100%;
+    width: 94%;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -339,7 +340,7 @@ input[type="time"]:focus {
 }
 
 .input-simples input {
-    width: 100%;
+    width: 94%;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -363,10 +364,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <header>
         <div class="header-content">
             <a href="index.html" class="header-link">Início</a>
-        <a href="logout.php" class="header-link" onclick="openLogoutModal(event)">Sair</a>
     </header>
-
-    <div class="admin-box">
+<div class="admin-box">
         <h1>Cadastrar Escala</h1>
         
         <?php if (!empty($mensagem)): ?>
@@ -376,16 +375,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <?php endif; ?>
 
         <form method="POST" action="">
-      <div class="input-simples">
-    <input type="text" class="campo-data" placeholder="Data da Missa" 
-           onfocus="(this.type='date')" required>
-</div>
+            <!-- Corrigir os campos de data e horário para usar name e type corretos -->
+            <div class="input-simples">
+                <input type="date" name="data_missa" placeholder="Data da Missa" required>
+            </div>
 
-<div class="input-simples">
-    <input type="text" class="campo-horario" placeholder="Horário" 
-           onfocus="(this.type='time')" required>
-</div>
-    <input type="text" name="descricao" placeholder="Descrição da Missa" required>
+            <div class="input-simples">
+                <input type="time" name="horario" placeholder="Horário" required>
+            </div>
+            
+            <input type="text" name="descricao" placeholder="Descrição da Missa" required>
 
             <div style="margin: 20px 0;">
                 <h3 style="margin-bottom: 15px; color: #2f4f4f;">Funções:</h3>

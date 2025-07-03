@@ -11,100 +11,115 @@ if (!$nome_participante_logado) {
     exit();
 }
 
-// Obter o tipo do usuário (acólito ou coroinha)
-$sqlTipo = "SELECT tipo FROM new_table WHERE NOME = ?";
-$stmtTipo = $pdo->prepare($sqlTipo);
-$stmtTipo->execute([$nome_participante_logado]);
-$tipo_usuario = $stmtTipo->fetchColumn();
+// Obter o tipo do usuário
+if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
+    $tipo_usuario = 'admin';
+} else {
+    $sqlTipo = "SELECT tipo FROM new_table WHERE NOME = ?";
+    $stmtTipo = $pdo->prepare($sqlTipo);
+    $stmtTipo->execute([$nome_participante_logado]);
+    $tipo_usuario = $stmtTipo->fetchColumn();
+}
 
 if (isset($_POST['reservar'])) {
-    $id_funcao = $_POST['id_funcao'] ?? '';
-
-    if (!$id_funcao) {
-        $mensagem = "Função inválida.";
+    // Verificação adicional para coordenação
+    if ($tipo_usuario === 'admin') {
+        $mensagem = "Coordenação não pode reservar funções.";
     } else {
-        try {
-            $sqlEscala = "SELECT id_escala FROM funcoes WHERE id = ?";
-            $stmtEscala = $pdo->prepare($sqlEscala);
-            $stmtEscala->execute([$id_funcao]);
-            $id_escala = $stmtEscala->fetchColumn();
+        $id_funcao = $_POST['id_funcao'] ?? '';
 
-            if (!$id_escala) {
-                $mensagem = "Ainda não há escalas cadastradas.";
-            } else {
-                $sqlVerifica = "
-                    SELECT COUNT(*) FROM participantes_funcoes pf
-                    JOIN funcoes f ON pf.id_funcao = f.id
-                    WHERE f.id_escala = ? AND pf.nome_participante = ?
-                ";
-                $stmtVerifica = $pdo->prepare($sqlVerifica);
-                $stmtVerifica->execute([$id_escala, $nome_participante_logado]);
-                $jaReservou = $stmtVerifica->fetchColumn();
+        if (!$id_funcao) {
+            $mensagem = "Função inválida.";
+        } else {
+            try {
+                $pdo->beginTransaction();
 
-                if ($jaReservou > 0) {
-                    $mensagem = "Você já reservou uma função nesta escala e não pode reservar outra.";
+                $sqlEscala = "SELECT id_escala FROM funcoes WHERE id = ?";
+                $stmtEscala = $pdo->prepare($sqlEscala);
+                $stmtEscala->execute([$id_funcao]);
+                $id_escala = $stmtEscala->fetchColumn();
+
+                if (!$id_escala) {
+                    $mensagem = "Ainda não há escalas cadastradas.";
+                    $pdo->rollBack();
                 } else {
-                    $sqlFuncao = "SELECT funcao FROM funcoes WHERE id = ?";
-                    $stmtFuncao = $pdo->prepare($sqlFuncao);
-                    $stmtFuncao->execute([$id_funcao]);
-                    $funcao = $stmtFuncao->fetchColumn();
+                    $sqlVerifica = "SELECT COUNT(*) FROM participantes_funcoes pf
+                                  JOIN funcoes f ON pf.id_funcao = f.id
+                                  WHERE f.id_escala = ? AND pf.nome_participante = ?";
+                    $stmtVerifica = $pdo->prepare($sqlVerifica);
+                    $stmtVerifica->execute([$id_escala, $nome_participante_logado]);
+                    $jaReservou = $stmtVerifica->fetchColumn();
 
-                    if (!$funcao) {
-                        $mensagem = "Função inválida.";
+                    if ($jaReservou > 0) {
+                        $mensagem = "Você já reservou uma função nesta escala.";
+                        $pdo->rollBack();
                     } else {
-                        $funcaoLower = mb_strtolower(trim($funcao), 'UTF-8');
+                        $sqlFuncao = "SELECT funcao FROM funcoes WHERE id = ?";
+                        $stmtFuncao = $pdo->prepare($sqlFuncao);
+                        $stmtFuncao->execute([$id_funcao]);
+                        $funcao = $stmtFuncao->fetchColumn();
 
-                        if ($funcaoLower === 'não participarei') {
-                            $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
-                            $stmtInsere = $pdo->prepare($sqlInsere);
-                            $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
-                            $mensagem = "Função 'Não participarei' reservada com sucesso!";
+                        if (!$funcao) {
+                            $mensagem = "Função inválida.";
+                            $pdo->rollBack();
                         } else {
-                            // Verificar se a função corresponde ao tipo do usuário
-                            $funcaoValida = false;
-                            if ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
-                                $funcaoValida = true;
-                            } elseif ($tipo_usuario === 'coroinha' && (strpos($funcaoLower, 'coroinha') !== false)) {
-                                $funcaoValida = true;
-                            }
+                            $funcaoLower = mb_strtolower(trim($funcao), 'UTF-8');
 
-                            if (!$funcaoValida) {
-                                $mensagem = "Esta função não está disponível para o seu tipo de participante.";
+                            if ($funcaoLower === 'não participarei') {
+                                $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
+                                $stmtInsere = $pdo->prepare($sqlInsere);
+                                $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
+                                
+                                $pdo->commit();
+                                $mensagem = "Função 'Não participarei' reservada com sucesso!";
                             } else {
-                                $sqlConta = "SELECT COUNT(*) FROM participantes_funcoes WHERE id_funcao = ?";
-                                $stmtConta = $pdo->prepare($sqlConta);
-                                $stmtConta->execute([$id_funcao]);
-                                $contagem = $stmtConta->fetchColumn();
+                                $funcaoCompativel = false;
+                                if ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
+                                    $funcaoCompativel = true;
+                                } elseif ($tipo_usuario === 'coroinha' && strpos($funcaoLower, 'coroinha') !== false) {
+                                    $funcaoCompativel = true;
+                                }
 
-                                if ($contagem > 0) {
-                                    $mensagem = "Essa função já foi reservada.";
+                                if (!$funcaoCompativel) {
+                                    $mensagem = "Esta função não está disponível para o seu tipo de participante.";
+                                    $pdo->rollBack();
                                 } else {
-                                    $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
-                                    $stmtInsere = $pdo->prepare($sqlInsere);
-                                    $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
-                                    $mensagem = "Função reservada com sucesso!";
+                                    $sqlConta = "SELECT COUNT(*) FROM participantes_funcoes WHERE id_funcao = ?";
+                                    $stmtConta = $pdo->prepare($sqlConta);
+                                    $stmtConta->execute([$id_funcao]);
+                                    $contagem = $stmtConta->fetchColumn();
+
+                                    if ($contagem > 0) {
+                                        $mensagem = "Essa função já foi reservada.";
+                                        $pdo->rollBack();
+                                    } else {
+                                        $sqlInsere = "INSERT INTO participantes_funcoes (id_funcao, nome_participante) VALUES (?, ?)";
+                                        $stmtInsere = $pdo->prepare($sqlInsere);
+                                        $stmtInsere->execute([$id_funcao, $nome_participante_logado]);
+                                        
+                                        $pdo->commit();
+                                        $mensagem = "Função reservada com sucesso!";
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                $mensagem = "Erro ao reservar função: " . $e->getMessage();
             }
-        } catch (PDOException $e) {
-            $mensagem = "Erro ao reservar função: " . $e->getMessage();
         }
     }
 }
 
-$sql = "
-SELECT 
-    e.id AS escala_id, e.data_missa, e.horario, e.descricao,
-    f.id AS funcao_id, f.funcao,
-    pf.nome_participante
-FROM escalas e
-JOIN funcoes f ON e.id = f.id_escala
-LEFT JOIN participantes_funcoes pf ON f.id = pf.id_funcao
-ORDER BY e.data_missa, e.horario, f.id, pf.nome_participante
-";
+// Restante do código para buscar as escalas...
+$sql = "SELECT e.id AS escala_id, e.data_missa, e.horario, e.descricao,
+               f.id AS funcao_id, f.funcao, pf.nome_participante
+        FROM escalas e
+        JOIN funcoes f ON e.id = f.id_escala
+        LEFT JOIN participantes_funcoes pf ON f.id = pf.id_funcao
+        ORDER BY e.data_missa, e.horario, f.id, pf.nome_participante";
 
 $stmt = $pdo->query($sql);
 $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -143,7 +158,7 @@ foreach ($dados as $linha) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Escala das Missas</title>
     <style>
-        :root {
+         :root {
             --amarelo-principal: #D6A24C;
             --amarelo-hover: #A5753F;
             --fundo-claro: #FFF8F1;
@@ -194,7 +209,7 @@ foreach ($dados as $linha) {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             color: var(--texto-escuro);
             width: 100%;
-            max-width: 450px;
+            max-width: 800px;
             margin-top: 20px;
         }
         h1 {
@@ -230,8 +245,8 @@ foreach ($dados as $linha) {
             background-color: var(--amarelo-principal);
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 16px;
+            padding: 10px;
+            font-size: 14px;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -259,32 +274,17 @@ foreach ($dados as $linha) {
             background-color: #dff0d8;
             border-color: #d6e9c6;
         }
-        @media (max-width: 480px) {
-            body {
-                padding: 70px 15px 15px;
-            }
+        @media (max-width: 768px) {
             .tabela-box {
-                padding: 30px 20px;
-                border-radius: 10px;
-                max-width: 100%;
+                padding: 20px;
+                max-width: 95%;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
             }
             h1 {
                 font-size: 24px;
-                margin-bottom: 20px;
-            }
-            th, td {
-                padding: 10px;
-                font-size: 14px;
-            }
-            button {
-                padding: 12px;
-                font-size: 14px;
-            }
-            header {
-                padding: 15px 0;
-            }
-            .header-link {
-                font-size: 16px;
             }
         }
         .modal {
@@ -299,7 +299,6 @@ foreach ($dados as $linha) {
             align-items: center;
             z-index: 2000;
         }
-
         .modal-content {
             background-color: var(--fundo-claro);
             padding: 30px;
@@ -309,18 +308,15 @@ foreach ($dados as $linha) {
             max-width: 400px;
             width: 90%;
         }
-
         .modal h3 {
-            color: var(--marrom);
+            color: var(--texto-escuro);
             margin-bottom: 20px;
         }
-
         .modal-buttons {
             display: flex;
             justify-content: center;
             gap: 15px;
         }
-
         .modal-buttons button {
             padding: 10px 20px;
             border: none;
@@ -329,31 +325,27 @@ foreach ($dados as $linha) {
             font-weight: bold;
             transition: background-color 0.3s ease;
         }
-
         .modal-buttons button:first-child {
             background-color: var(--amarelo-principal);
             color: white;
         }
-
         .modal-buttons button:first-child:hover {
             background-color: var(--amarelo-hover);
         }
-
         .modal-buttons button:last-child {
             background-color: #f0f0f0;
-            color: var(--marrom);
+            color: var(--texto-escuro);
         }
-
         .modal-buttons button:last-child:hover {
             background-color: #e0e0e0;
         }
+        /* ... (manter todos os estilos existentes) ... */
     </style>
 </head>
 <body>
 <header>
     <div class="header-content">
         <a href="index.html" class="header-link">Início</a>
-        <a href="logout.php" class="header-link" onclick="openLogoutModal(event)">Sair</a>
     </div>
 </header>
 
@@ -367,81 +359,93 @@ foreach ($dados as $linha) {
         <p class="<?= $classe ?>"><?= htmlspecialchars($mensagem) ?></p>
     <?php endif; ?>
 
-    <?php foreach ($escalas as $escala): ?>
-        <h3><?= date('d/m/Y', strtotime($escala['data_missa'])) ?> - <?= date('H:i', strtotime($escala['horario'])) ?> | <?= htmlspecialchars($escala['descricao']) ?></h3>
+    <?php if (empty($escalas)): ?>
+        <p class="mensagem">Nenhuma escala cadastrada ainda.</p>
+    <?php else: ?>
+        <?php foreach ($escalas as $escala): ?>
+            <h3><?= date('d/m/Y', strtotime($escala['data_missa'])) ?> - <?= date('H:i', strtotime($escala['horario'])) ?> | <?= htmlspecialchars($escala['descricao']) ?></h3>
 
-        <?php
-        $usuarioJaReservou = false;
-        foreach ($escala['funcoes'] as $f) {
-            if (in_array($nome_participante_logado, $f['participantes'])) {
-                $usuarioJaReservou = true;
-                break;
+            <?php
+            $usuarioJaReservou = false;
+            foreach ($escala['funcoes'] as $f) {
+                if (in_array($nome_participante_logado, $f['participantes'])) {
+                    $usuarioJaReservou = true;
+                    break;
+                }
             }
-        }
-        ?>
+            ?>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Função</th>
-                    <th>Participantes</th>
-                    <th>Reservar</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($escala['funcoes'] as $funcao_id => $funcao): ?>
-                    <?php
-                    $funcaoLower = mb_strtolower(trim($funcao['funcao']), 'UTF-8');
-                    $funcaoNormal = $funcaoLower !== 'não participarei';
-                    $jaReservada = $funcaoNormal && count($funcao['participantes']) > 0;
-                    
-                    // Verificar se a função é compatível com o tipo do usuário
-                    $funcaoCompativel = false;
-                    if ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
-                        $funcaoCompativel = true;
-                    } elseif ($tipo_usuario === 'coroinha' && strpos($funcaoLower, 'coroinha') !== false) {
-                        $funcaoCompativel = true;
-                    } elseif ($funcaoLower === 'não participarei') {
-                        $funcaoCompativel = true;
-                    }
-
-                    $mostrarBotao = !$usuarioJaReservou && (!$jaReservada || !$funcaoNormal) && $funcaoCompativel;
-                    ?>
+            <table>
+                <thead>
                     <tr>
-                        <td><?= htmlspecialchars($funcao['funcao']) ?></td>
-                        <td>
-                            <?php if (!empty($funcao['participantes'])): ?>
-                                <ul class="participantes">
-                                    <?php foreach ($funcao['participantes'] as $participante): ?>
-                                        <li><?= htmlspecialchars($participante) ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php else: ?>
-                                <em>Sem participantes</em>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <?php if ($mostrarBotao): ?>
-                                <form method="POST" action="">
-                                    <input type="hidden" name="id_funcao" value="<?= $funcao_id ?>">
-                                    <button type="submit" name="reservar">Reservar</button>
-                                </form>
-                            <?php else: ?>
-                                <?php if ($usuarioJaReservou): ?>
-                                    <em>Você já reservou uma função nesta escala</em>
-                                <?php elseif (!$funcaoCompativel): ?>
-                                    <em>Função não disponível para seu tipo</em>
-                                <?php else: ?>
-                                    <em>Essa função já foi reservada.</em>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </td>
+                        <th>Função</th>
+                        <th>Participantes</th>
+                        <th>Ações</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endforeach; ?>
+                </thead>
+                <tbody>
+                    <?php foreach ($escala['funcoes'] as $funcao_id => $funcao): ?>
+                        <?php
+                        $funcaoLower = mb_strtolower(trim($funcao['funcao']), 'UTF-8');
+                        $funcaoNormal = $funcaoLower !== 'não participarei';
+                        $jaReservada = $funcaoNormal && count($funcao['participantes']) > 0;
+                        
+                        $funcaoCompativel = false;
+                        if ($tipo_usuario === 'admin') {
+                            $funcaoCompativel = false; // Admin não pode reservar
+                        } elseif ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
+                            $funcaoCompativel = true;
+                        } elseif ($tipo_usuario === 'coroinha' && strpos($funcaoLower, 'coroinha') !== false) {
+                            $funcaoCompativel = true;
+                        } elseif ($funcaoLower === 'não participarei') {
+                            $funcaoCompativel = true;
+                        }
+
+                        $mostrarBotao = !$usuarioJaReservou && 
+                                       (!$jaReservada || !$funcaoNormal) && 
+                                       $funcaoCompativel &&
+                                       $tipo_usuario !== 'admin'; // Admin não vê botão
+                        ?>
+                        <tr>
+                            <td><?= htmlspecialchars($funcao['funcao']) ?></td>
+                            <td>
+                                <?php if (!empty($funcao['participantes'])): ?>
+                                    <ul class="participantes">
+                                        <?php foreach ($funcao['participantes'] as $participante): ?>
+                                            <li><?= htmlspecialchars($participante) ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php else: ?>
+                                    <em>Sem participantes</em>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($mostrarBotao): ?>
+                                    <form method="POST" action="">
+                                        <input type="hidden" name="id_funcao" value="<?= $funcao_id ?>">
+                                        <button type="submit" name="reservar">Reservar</button>
+                                    </form>
+                                <?php else: ?>
+                                    <?php if ($tipo_usuario === 'admin'): ?>
+                                        <em>Coordenação não reserva funções</em>
+                                    <?php elseif ($usuarioJaReservou): ?>
+                                        <em>Você já reservou nesta escala</em>
+                                    <?php elseif (!$funcaoCompativel): ?>
+                                        <em>Indisponível para seu tipo</em>
+                                    <?php else: ?>
+                                        <em>Já reservado</em>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
+
+<!-- Modal de logout (mantido igual) -->
 <div id="logoutModal" class="modal" style="display: none;">
     <div class="modal-content">
         <h3>Tem certeza que deseja sair?</h3>
@@ -451,6 +455,7 @@ foreach ($dados as $linha) {
         </div>
     </div>
 </div>
+
 <script>
     function openLogoutModal(event) {
         event.preventDefault(); 
@@ -463,6 +468,5 @@ foreach ($dados as $linha) {
         document.getElementById('logoutModal').style.display = 'none';
     }
 </script>
-
 </body>
 </html>

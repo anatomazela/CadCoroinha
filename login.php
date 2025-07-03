@@ -4,33 +4,47 @@ include_once('config.php');
 
 $mensagem = '';
 
+// Verifica se há mensagem de cadastro bem-sucedido
+if (isset($_SESSION['msg_cadastro'])) {
+    $mensagem = $_SESSION['msg_cadastro'];
+    unset($_SESSION['msg_cadastro']);
+}
+
 if (isset($_POST['submit'])) {
     $email = $_POST['email'] ?? '';
     $senha = $_POST['senha'] ?? '';
 
-    if ($email && $senha) {
-        $sql = "SELECT * FROM users WHERE email = :email";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':email' => $email]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($senha, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['tipo'] = $usuario['tipo'];
-            $_SESSION['is_admin'] = $user['is_admin'];
-
-            if ($user['is_admin']) {
-                header('Location: admin.php');
-            } else {
-                header('Location: user.php');
-            }
-            exit();
-        } else {
-            $mensagem = "Email ou senha inválidos.";
-        }
-    } else {
+    if (empty($email) || empty($senha)) {
         $mensagem = "Por favor, preencha todos os campos.";
+    } else {
+        try {
+            $sql = "SELECT u.*, n.tipo FROM users u 
+                    LEFT JOIN new_table n ON u.username = n.NOME 
+                    WHERE u.email = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($senha, $user['password'])) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['is_admin'] = $user['is_admin'];
+                $_SESSION['tipo'] = $user['is_admin'] ? 'admin' : ($user['tipo'] ?? null);
+
+                // Redireciona conforme o tipo de usuário
+                if ($user['is_admin']) {
+                    header('Location: admin.php');
+                } else {
+                    header('Location: user.php');
+                }
+                exit();
+            } else {
+                $mensagem = "Email ou senha inválidos.";
+            }
+        } catch (PDOException $e) {
+            $mensagem = "Erro no sistema. Por favor, tente novamente mais tarde.";
+            error_log("Login error: " . $e->getMessage());
+        }
     }
 }
 ?>
@@ -39,8 +53,8 @@ if (isset($_POST['submit'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title> Login </title>
-    <style>
+    <title>Login</title>
+ <style>
         :root {
             --amarelo-principal: #D6A24C;
             --amarelo-hover: #A5753F;
@@ -159,17 +173,25 @@ if (isset($_POST['submit'])) {
 </head>
 <body>
     <header>
-        <a href="index.html">Início</a>
+        <a href="index.html" class="header-link">Início</a>
     </header>
 
     <div class="login-box">
         <h1>Login</h1>
-        <?php if (!empty($mensagem)) echo "<p class='mensagem-erro'>$mensagem</p>"; ?>
+        
+        <?php if (!empty($mensagem)): ?>
+            <div class="<?= strpos($mensagem, 'sucesso') !== false ? 'mensagem-sucesso' : 'mensagem-erro' ?>">
+                <?= htmlspecialchars($mensagem) ?>
+            </div>
+        <?php endif; ?>
+        
         <form method="POST" action="">
             <input type="email" name="email" placeholder="Email" required />
             <input type="password" name="senha" placeholder="Senha" required />
             <button type="submit" name="submit">Entrar</button>
         </form>
+        
+        </div>
     </div>
 </body>
 </html>

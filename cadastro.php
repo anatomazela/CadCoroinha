@@ -11,37 +11,57 @@ if (isset($_POST['submit'])) {
     $nascimento = $_POST['nascimento'] ?? '';
     $endereco = $_POST['endereco'] ?? '';
     $senha = $_POST['senha'] ?? '';
-    $tipo = $_POST['tipo'] ?? '';
+    $tipo = $_POST['tipo'] ?? null;
     $admin = isset($_POST['admin']) ? 1 : 0;
 
-    if (!$nome || !$email || !$telefone || !$nascimento || !$endereco || !$senha || !$tipo) {
+    // Validação modificada para permitir tipo nulo para admins
+    $camposObrigatorios = [$nome, $email, $telefone, $nascimento, $endereco, $senha];
+    if ($admin == 0) {
+        $camposObrigatorios[] = $tipo;
+    }
+
+    if (in_array('', $camposObrigatorios)) {
         $mensagem = "Por favor, preencha todos os campos.";
     } else {
         try {
+            $pdo->beginTransaction();
+
             $sqlCheck = "SELECT id FROM users WHERE email = ?";
             $stmtCheck = $pdo->prepare($sqlCheck);
             $stmtCheck->execute([$email]);
             
             if ($stmtCheck->fetch()) {
                 $mensagem = "Este email já está cadastrado.";
+                $pdo->rollBack();
             } else {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
+                // Primeiro insere na tabela users
                 $sqlInsertUser = "INSERT INTO users (username, email, password, is_admin) 
                                 VALUES (?, ?, ?, ?)";
                 $stmtUser = $pdo->prepare($sqlInsertUser);
                 $stmtUser->execute([$nome, $email, $senhaHash, $admin]);
 
-                $sqlInsertNew = "INSERT INTO new_table (NOME, EMAIL, TELEFONE, NASCIMENTO, ENDERECO, tipo) 
-                               VALUES (?, ?, ?, ?, ?, ?)";
-                $stmtNew = $pdo->prepare($sqlInsertNew);
-                $stmtNew->execute([$nome, $email, $telefone, $nascimento, $endereco, $tipo]);
+                // Depois insere na new_table
+                if ($admin) {
+                    $sqlInsertNew = "INSERT INTO new_table (NOME, EMAIL, TELEFONE, NASCIMENTO, ENDERECO) 
+                                   VALUES (?, ?, ?, ?, ?)";
+                    $stmtNew = $pdo->prepare($sqlInsertNew);
+                    $stmtNew->execute([$nome, $email, $telefone, $nascimento, $endereco]);
+                } else {
+                    $sqlInsertNew = "INSERT INTO new_table (NOME, EMAIL, TELEFONE, NASCIMENTO, ENDERECO, tipo) 
+                                   VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmtNew = $pdo->prepare($sqlInsertNew);
+                    $stmtNew->execute([$nome, $email, $telefone, $nascimento, $endereco, $tipo]);
+                }
 
+                $pdo->commit();
                 $_SESSION['msg_cadastro'] = "Cadastro realizado com sucesso! Faça login.";
                 header("Location: login.php");
                 exit();
             }
         } catch (PDOException $e) {
+            $pdo->rollBack();
             $mensagem = "Erro ao cadastrar: " . $e->getMessage();
         }
     }
@@ -193,26 +213,26 @@ if (isset($_POST['submit'])) {
             border: 1px solid #f5c6cb;
         }
 
-        .input-date-container {
-            position: relative;
+        .input-simples {
+            margin-bottom: 15px;
         }
 
-        .date-placeholder {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            color: #999;
-            pointer-events: none;
-            padding: 0 5px;
+        .input-simples input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
         }
 
-        input:focus {
+        .input-simples input:focus {
             border-color: var(--amarelo-principal);
             outline: none;
             box-shadow: 0 0 5px var(--amarelo-principal);
         }
 
-        input[type="date"]:valid + .date-placeholder {
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: none;
             display: none;
         }
 
@@ -243,29 +263,6 @@ if (isset($_POST['submit'])) {
                 font-size: 15px;
             }
         }
-        .input-simples {
-    margin-bottom: 15px;
-}
-
-.input-simples input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
-}
-
-.input-simples input:focus {
-    border-color: var(--amarelo-principal);
-    outline: none;
-    box-shadow: 0 0 5px var(--amarelo-principal);
-}
-
-/* Esconde o ícone do calendário no Chrome */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    background: none;
-    display: none;
-}
     </style>
 </head>
 <body>
@@ -286,15 +283,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             <input type="text" name="nome" placeholder="Nome completo" required>
             <input type="email" name="email" placeholder="Email" required>
             <input type="tel" name="telefone" placeholder="Telefone" required>
-           <div class="input-simples">
-            <input type="text" class="campo-data" name='nascimento' placeholder="Data de Nascimento" 
-           onfocus="(this.type='date')" required>
+            <div class="input-simples">
+                <input type="text" class="campo-data" name='nascimento' placeholder="Data de Nascimento" 
+                       onfocus="(this.type='date')" required>
             </div>
 
             <input type="text" name="endereco" placeholder="Endereço" required>
             <input type="password" name="senha" placeholder="Senha" required>
             
-            <div class="tipo-container">
+            <div class="tipo-container" id="tipoContainer">
                 <h3>Tipo de participante:</h3>
                 <label class="tipo-option">
                     <input type="radio" name="tipo" value="acolito" required> Acólito
@@ -311,18 +308,39 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             
             <button type="submit" name="submit">Cadastrar</button>
         </form>
+        
         <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Mantém o placeholder visível quando perde o foco sem valor
-    document.querySelectorAll('.campo-data, .campo-horario').forEach(input => {
-        input.addEventListener('blur', function() {
-            if(!this.value) {
-                this.type = 'text';
-            }
-        });
-    });
-});
-</script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Mantém o placeholder visível quando perde o foco sem valor
+                document.querySelectorAll('.campo-data').forEach(input => {
+                    input.addEventListener('blur', function() {
+                        if(!this.value) {
+                            this.type = 'text';
+                        }
+                    });
+                });
+
+                const adminCheckbox = document.querySelector('input[name="admin"]');
+                const tipoContainer = document.getElementById('tipoContainer');
+                
+                function toggleTipoContainer() {
+                    if(adminCheckbox.checked) {
+                        tipoContainer.style.display = 'none';
+                        document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+                            radio.required = false;
+                        });
+                    } else {
+                        tipoContainer.style.display = 'block';
+                        document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+                            radio.required = true;
+                        });
+                    }
+                }
+                
+                adminCheckbox.addEventListener('change', toggleTipoContainer);
+                toggleTipoContainer();
+            });
+        </script>
     </div>
 </body>
 </html>
