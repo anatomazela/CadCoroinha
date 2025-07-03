@@ -1,3 +1,3 @@
 <?php
 session_start();
-echo isset($_SESSION['username']) ? 'logado' : 'anonimo';
+echo isset($_SESSION['username']) ? 'logado' : 'anonimo';   

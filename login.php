@@ -4,7 +4,6 @@ include_once('config.php');
 
 $mensagem = '';
 
-// Verifica se há mensagem de cadastro bem-sucedido
 if (isset($_SESSION['msg_cadastro'])) {
     $mensagem = $_SESSION['msg_cadastro'];
     unset($_SESSION['msg_cadastro']);
@@ -31,7 +30,6 @@ if (isset($_POST['submit'])) {
                 $_SESSION['is_admin'] = $user['is_admin'];
                 $_SESSION['tipo'] = $user['is_admin'] ? 'admin' : ($user['tipo'] ?? null);
 
-                // Redireciona conforme o tipo de usuário
                 if ($user['is_admin']) {
                     header('Location: admin.php');
                 } else {

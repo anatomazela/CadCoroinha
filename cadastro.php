@@ -14,7 +14,6 @@ if (isset($_POST['submit'])) {
     $tipo = $_POST['tipo'] ?? null;
     $admin = isset($_POST['admin']) ? 1 : 0;
 
-    // Validação modificada para permitir tipo nulo para admins
     $camposObrigatorios = [$nome, $email, $telefone, $nascimento, $endereco, $senha];
     if ($admin == 0) {
         $camposObrigatorios[] = $tipo;
@@ -36,13 +35,11 @@ if (isset($_POST['submit'])) {
             } else {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-                // Primeiro insere na tabela users
                 $sqlInsertUser = "INSERT INTO users (username, email, password, is_admin) 
                                 VALUES (?, ?, ?, ?)";
                 $stmtUser = $pdo->prepare($sqlInsertUser);
                 $stmtUser->execute([$nome, $email, $senhaHash, $admin]);
 
-                // Depois insere na new_table
                 if ($admin) {
                     $sqlInsertNew = "INSERT INTO new_table (NOME, EMAIL, TELEFONE, NASCIMENTO, ENDERECO) 
                                    VALUES (?, ?, ?, ?, ?)";
@@ -311,7 +308,6 @@ if (isset($_POST['submit'])) {
         
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Mantém o placeholder visível quando perde o foco sem valor
                 document.querySelectorAll('.campo-data').forEach(input => {
                     input.addEventListener('blur', function() {
                         if(!this.value) {

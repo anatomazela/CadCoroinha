@@ -11,7 +11,6 @@ if (!$nome_participante_logado) {
     exit();
 }
 
-// Obter o tipo do usuário
 if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
     $tipo_usuario = 'admin';
 } else {
@@ -22,7 +21,6 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
 }
 
 if (isset($_POST['reservar'])) {
-    // Verificação adicional para coordenação
     if ($tipo_usuario === 'admin') {
         $mensagem = "Coordenação não pode reservar funções.";
     } else {
@@ -113,7 +111,6 @@ if (isset($_POST['reservar'])) {
     }
 }
 
-// Restante do código para buscar as escalas...
 $sql = "SELECT e.id AS escala_id, e.data_missa, e.horario, e.descricao,
                f.id AS funcao_id, f.funcao, pf.nome_participante
         FROM escalas e
@@ -339,7 +336,6 @@ foreach ($dados as $linha) {
         .modal-buttons button:last-child:hover {
             background-color: #e0e0e0;
         }
-        /* ... (manter todos os estilos existentes) ... */
     </style>
 </head>
 <body>
@@ -392,7 +388,7 @@ foreach ($dados as $linha) {
                         
                         $funcaoCompativel = false;
                         if ($tipo_usuario === 'admin') {
-                            $funcaoCompativel = false; // Admin não pode reservar
+                            $funcaoCompativel = false; 
                         } elseif ($tipo_usuario === 'acolito' && (strpos($funcaoLower, 'acólito') !== false || strpos($funcaoLower, 'acolito') !== false)) {
                             $funcaoCompativel = true;
                         } elseif ($tipo_usuario === 'coroinha' && strpos($funcaoLower, 'coroinha') !== false) {
@@ -404,7 +400,7 @@ foreach ($dados as $linha) {
                         $mostrarBotao = !$usuarioJaReservou && 
                                        (!$jaReservada || !$funcaoNormal) && 
                                        $funcaoCompativel &&
-                                       $tipo_usuario !== 'admin'; // Admin não vê botão
+                                       $tipo_usuario !== 'admin'; 
                         ?>
                         <tr>
                             <td><?= htmlspecialchars($funcao['funcao']) ?></td>
@@ -445,7 +441,6 @@ foreach ($dados as $linha) {
     <?php endif; ?>
 </div>
 
-<!-- Modal de logout (mantido igual) -->
 <div id="logoutModal" class="modal" style="display: none;">
     <div class="modal-content">
         <h3>Tem certeza que deseja sair?</h3>

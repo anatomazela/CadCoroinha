@@ -1,7 +1,7 @@
 git add .
 git commit -m "mensagem sobre a alteração"
 git push
-
+   
 https://portalmoltemp21.websiteseguro.com/CadCoroinha/
 
 >> Apagar e refazer o banco

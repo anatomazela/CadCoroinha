@@ -10,7 +10,6 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
 $mensagem = '';
 
 if (isset($_POST['submit'])) {
-    // Corrigir os nomes dos campos para corresponder ao HTML
     $data_missa = $_POST['data_missa'] ?? '';
     $horario = $_POST['horario'] ?? '';
     $descricao = $_POST['descricao'] ?? '';
@@ -353,7 +352,6 @@ input[type="time"]:focus {
     box-shadow: 0 0 5px var(--amarelo-principal);
 }
 
-/* Esconde o ícone do calendário no Chrome */
 input[type="date"]::-webkit-calendar-picker-indicator {
     background: none;
     display: none;
@@ -364,6 +362,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <header>
         <div class="header-content">
             <a href="index.html" class="header-link">Início</a>
+            <a href="cadastro.php" class="header-link">Cadastrar Usuários</a>
+
     </header>
 <div class="admin-box">
         <h1>Cadastrar Escala</h1>
@@ -375,7 +375,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <?php endif; ?>
 
         <form method="POST" action="">
-            <!-- Corrigir os campos de data e horário para usar name e type corretos -->
             <div class="input-simples">
                 <input type="date" name="data_missa" placeholder="Data da Missa" required>
             </div>
@@ -426,12 +425,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     
 </script>
 <script>
-// Mostra o picker ao clicar no campo de data
 document.getElementById('data_missa').addEventListener('click', function() {
     this.showPicker();
 });
 
-// Remove placeholders quando há valor
 document.querySelectorAll('input[type="date"], input[type="time"]').forEach(input => {
     input.addEventListener('change', function() {
         if(this.value) {
@@ -441,13 +438,11 @@ document.querySelectorAll('input[type="date"], input[type="time"]').forEach(inpu
         }
     });
     
-    // Verifica se já tem valor ao carregar a página
     if(input.value) {
         input.setAttribute('data-filled', 'true');
     }
 });
 document.addEventListener('DOMContentLoaded', function() {
-    // Mantém o placeholder visível quando perde o foco sem valor
     document.querySelectorAll('.campo-data, .campo-horario').forEach(input => {
         input.addEventListener('blur', function() {
             if(!this.value) {
