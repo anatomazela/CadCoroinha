@@ -363,6 +363,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <div class="header-content">
             <a href="index.html" class="header-link">Início</a>
             <a href="cadastro.php" class="header-link">Cadastrar Usuários</a>
+            <a href="listar_participantes.php" class="header-link">Listar Cadastrados</a>
 
     </header>
 <div class="admin-box">
@@ -387,16 +388,29 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
             <div style="margin: 20px 0;">
                 <h3 style="margin-bottom: 15px; color: #2f4f4f;">Funções:</h3>
-                <input type="text" name="funcoes[]" value="Acólito" required>
-                <input type="text" name="funcoes[]" value="Acólito">
-                <input type="text" name="funcoes[]" value="Acólito I">
-                <input type="text" name="funcoes[]" value="Coroinha">
-                <input type="text" name="funcoes[]" value="Coroinha">
-                <input type="text" name="funcoes[]" value="Coroinha">
-                <input type="text" name="funcoes[]" value="Coroinha I">
-                <input type="text" name="funcoes[]" value="Coroinha I">
-                <input type="text" name="funcoes[]" value="Coroinha I">
-                <input type="text" name="funcoes[]" value="Não Participarei">
+                <div id="funcoes-container">
+                    <div class="funcao-item" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <input type="text" name="funcoes[]" value="Acólito" required placeholder="Função">
+                        <button type="button" class="remover-funcao" style="display:none;background:#d9534f;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remover</button>
+                    </div>
+                    <div class="funcao-item" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <input type="text" name="funcoes[]" value="Acólito I" placeholder="Função">
+                        <button type="button" class="remover-funcao" style="background:#d9534f;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remover</button>
+                    </div>
+                    <div class="funcao-item" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <input type="text" name="funcoes[]" value="Coroinha" placeholder="Função">
+                        <button type="button" class="remover-funcao" style="background:#d9534f;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remover</button>
+                    </div>
+                    <div class="funcao-item" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <input type="text" name="funcoes[]" value="Coroinha I" placeholder="Função">
+                        <button type="button" class="remover-funcao" style="background:#d9534f;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remover</button>
+                    </div>
+                    <div class="funcao-item" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <input type="text" name="funcoes[]" value="Não Participarei" placeholder="Função">
+                        <button type="button" class="remover-funcao" style="background:#d9534f;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remover</button>
+                    </div>
+                </div>
+                <button type="button" id="adicionar-funcao" style="margin-top:10px;background:#28a745;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Adicionar Função</button>
             </div>
 
             <button type="submit" name="submit">Cadastrar Escala</button>
@@ -423,6 +437,46 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         document.getElementById('logoutModal').style.display = 'none';
     }
     
+</script>
+<script>
+// Funções dinâmicas para adicionar/remover campos de função
+document.addEventListener('DOMContentLoaded', function() {
+    const funcoesContainer = document.getElementById('funcoes-container');
+    const btnAdicionar = document.getElementById('adicionar-funcao');
+
+    function atualizarRemoverBtns() {
+        const items = funcoesContainer.querySelectorAll('.funcao-item');
+        items.forEach((item, idx) => {
+            const btn = item.querySelector('.remover-funcao');
+            btn.style.display = (items.length > 1) ? 'inline-block' : 'none';
+        });
+    }
+
+    funcoesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remover-funcao')) {
+            // Se o botão está dentro de um span, remover o avô (div.funcao-item)
+            let funcaoItem = e.target.closest('.funcao-item');
+            if (funcaoItem) {
+                funcaoItem.remove();
+                atualizarRemoverBtns();
+            }
+        }
+    });
+
+    btnAdicionar.addEventListener('click', function() {
+        const div = document.createElement('div');
+        div.className = 'funcao-item';
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.style.gap = '8px';
+        div.style.marginBottom = '8px';
+        div.innerHTML = `<input type="text" name="funcoes[]" placeholder="Função" required> <button type="button" class="remover-funcao" style="background:#d9534f;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Remover</button>`;
+        funcoesContainer.appendChild(div);
+        atualizarRemoverBtns();
+    });
+
+    atualizarRemoverBtns();
+});
 </script>
 <script>
 document.getElementById('data_missa').addEventListener('click', function() {

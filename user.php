@@ -20,6 +20,37 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
     $tipo_usuario = $stmtTipo->fetchColumn();
 }
 
+// Excluir escala (apenas admin)
+if (isset($_POST['excluir_escala']) && $tipo_usuario === 'admin') {
+    $id_escala_excluir = $_POST['id_escala'] ?? '';
+    if ($id_escala_excluir) {
+        try {
+            $pdo->beginTransaction();
+            // Exclui participantes_funcoes ligados às funções da escala
+            $sqlFuncoes = "SELECT id FROM funcoes WHERE id_escala = ?";
+            $stmtFuncoes = $pdo->prepare($sqlFuncoes);
+            $stmtFuncoes->execute([$id_escala_excluir]);
+            $funcoes = $stmtFuncoes->fetchAll(PDO::FETCH_COLUMN);
+            if ($funcoes) {
+                $in = str_repeat('?,', count($funcoes) - 1) . '?';
+                $pdo->prepare("DELETE FROM participantes_funcoes WHERE id_funcao IN ($in)")->execute($funcoes);
+            }
+            // Exclui funções da escala
+            $pdo->prepare("DELETE FROM funcoes WHERE id_escala = ?")->execute([$id_escala_excluir]);
+            // Exclui a escala
+            $pdo->prepare("DELETE FROM escalas WHERE id = ?")->execute([$id_escala_excluir]);
+            $pdo->commit();
+            $mensagem = "Escala excluída com sucesso!";
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            $mensagem = "Erro ao excluir escala: " . $e->getMessage();
+        }
+        // Atualiza dados após exclusão
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+}
+
 if (isset($_POST['reservar'])) {
     if ($tipo_usuario === 'admin') {
         $mensagem = "Coordenação não pode reservar funções.";
@@ -358,8 +389,18 @@ foreach ($dados as $linha) {
     <?php if (empty($escalas)): ?>
         <p class="mensagem">Nenhuma escala cadastrada ainda.</p>
     <?php else: ?>
-        <?php foreach ($escalas as $escala): ?>
-            <h3><?= date('d/m/Y', strtotime($escala['data_missa'])) ?> - <?= date('H:i', strtotime($escala['horario'])) ?> | <?= htmlspecialchars($escala['descricao']) ?></h3>
+        <?php foreach ($escalas as $escala_id => $escala): ?>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <h3 style="margin-bottom:0;">
+                    <?= date('d/m/Y', strtotime($escala['data_missa'])) ?> - <?= date('H:i', strtotime($escala['horario'])) ?> | <?= htmlspecialchars($escala['descricao']) ?>
+                </h3>
+                <?php if ($tipo_usuario === 'admin'): ?>
+                    <form method="POST" action="" onsubmit="return confirm('Tem certeza que deseja excluir esta escala?');" style="margin:0;">
+                        <input type="hidden" name="id_escala" value="<?= $escala_id ?>">
+                        <button type="submit" name="excluir_escala" style="background:#d9534f; color:white; border:none; padding:6px 14px; border-radius:6px; font-size:14px; cursor:pointer;">Excluir</button>
+                    </form>
+                <?php endif; ?>
+            </div>
 
             <?php
             $usuarioJaReservou = false;

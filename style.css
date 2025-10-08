@@ -59,7 +59,7 @@ header a:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     color: var(--texto-escuro);
     width: 95%;
-    margin: 80px auto 30px;
+    margin: 10px auto 30px;
     max-width: 1200px;
 }
 
