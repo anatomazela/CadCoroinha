@@ -439,7 +439,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     
 </script>
 <script>
-// Funções dinâmicas para adicionar/remover campos de função
+
 document.addEventListener('DOMContentLoaded', function() {
     const funcoesContainer = document.getElementById('funcoes-container');
     const btnAdicionar = document.getElementById('adicionar-funcao');
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     funcoesContainer.addEventListener('click', function(e) {
         if (e.target.classList.contains('remover-funcao')) {
-            // Se o botão está dentro de um span, remover o avô (div.funcao-item)
+         
             let funcaoItem = e.target.closest('.funcao-item');
             if (funcaoItem) {
                 funcaoItem.remove();

@@ -11,6 +11,50 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     echo '<p style="color:red;">Acesso negado. Faça login como administrador.</p>';
     exit();
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['excluir_id'])) {
+    $excluir_id = (int) $_POST['excluir_id'];
+    $excluir_email = isset($_POST['excluir_email']) ? trim($_POST['excluir_email']) : '';
+    if ($excluir_id <= 0) {
+        echo "<script>alert('ID inválido para exclusão.');</script>";
+    } else {
+        try {
+            
+            if ($excluir_email !== '') {
+                $pdo->beginTransaction();
+                $sqlUserDel = "DELETE FROM users WHERE email = ?";
+                $stmtUserDel = $pdo->prepare($sqlUserDel);
+                $stmtUserDel->execute([$excluir_email]);
+                $userRows = $stmtUserDel->rowCount();
+                if ($userRows > 0) {
+                    $pdo->commit();
+                    echo "<script>alert('Usuário e participante excluídos com sucesso.');window.location.href=window.location.href;</script>";
+                    exit();
+                }
+                
+                $pdo->rollBack();
+            }
+
+            
+            $sqlDel = "DELETE FROM new_table WHERE id = ?";
+            $stmtDel = $pdo->prepare($sqlDel);
+            $stmtDel->execute([$excluir_id]);
+            $rows = $stmtDel->rowCount();
+            if ($rows > 0) {
+                echo "<script>alert('Participante excluído com sucesso.');window.location.href=window.location.href;</script>";
+                exit();
+            } else {
+                echo "<script>alert('Nenhum participante encontrado com esse ID.');</script>";
+            }
+        } catch (Exception $e) {
+            
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            echo "<script>alert('Erro ao excluir participante: " . addslashes($e->getMessage()) . "');</script>";
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -20,12 +64,22 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     <title>Listar Participantes</title>
     <link rel="stylesheet" href="style.css">
     <style>
-    /* Garante cursor de digitação em todos os inputs do modal */
+    
     #modal-editar input[type="text"],
     #modal-editar input[type="email"],
     #modal-editar input[type="date"] {
         cursor: text;
     }
+    
+    .actions-cell { display:flex; gap:8px; align-items:center; justify-content:center; }
+    .btn { border: none; padding:6px 10px; border-radius:6px; font-size:13px; cursor:pointer; transition:all .15s ease; display:inline-flex; gap:6px; align-items:center; }
+    .btn:focus { outline:3px solid rgba(0,123,255,0.15); }
+    .btn-edit { background: #f0f7ff; color:#06488b; border:1px solid #cfe3ff; }
+    .btn-edit:hover { background:#e6f0ff; transform:translateY(-1px); }
+    .btn-delete { background:#fff5f5; color:#b02a37; border:1px solid #ffc9c9; }
+    .btn-delete:hover { background:#ffecec; transform:translateY(-1px); }
+   
+    .btn .icon { font-size:14px; line-height:1; }
     </style>
 </head>
 <body>
@@ -74,8 +128,16 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
                 echo "<td>$nascimento</td>";
                 echo "<td>$endereco</td>";
                 echo "<td>$tipo</td>";
-                echo "<td><button type='button' class='editar-btn' 
-                    data-id='$id' data-nome='$nome' data-email='$email' data-telefone='$telefone' data-nascimento='$nascimento' data-endereco='$endereco' data-tipo='$tipo' style='background:#f5f5f5;color:#333;border:1px solid #bbb;padding:3px 10px;border-radius:5px;font-size:13px;cursor:pointer;transition:background 0.2s;'>✏️ Editar</button></td>";
+                echo "<td class='actions-cell'>";
+                echo "<button type='button' class='btn btn-edit editar-btn' 
+                    data-id='$id' data-nome='$nome' data-email='$email' data-telefone='$telefone' data-nascimento='$nascimento' data-endereco='$endereco' data-tipo='$tipo'> <span class='icon'>✏️</span> <span>Editar</span></button>";
+                
+                echo "<form method='POST' onsubmit=\"return confirm('Confirma exclusão do participante?');\" style='display:inline;margin:0;'>";
+                echo "<input type='hidden' name='excluir_id' value='$id'>";
+                echo "<input type='hidden' name='excluir_email' value='" . htmlspecialchars($email, ENT_QUOTES) . "'>";
+                echo "<button type='submit' name='excluir_participante' class='btn btn-delete'><span class='icon'>🗑️</span> <span>Excluir</span></button>";
+                echo "</form>";
+                echo "</td>";
                 echo "</tr>";
             }
             echo "</table>";
@@ -88,9 +150,6 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     ?>
 </div>
 </div>
-
-<!-- Modal de edição -->
-
 
 <div id="modal-editar" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:9999;">
     <div style="background:#fff;padding:12px 10px 12px 10px;border-radius:10px;min-width:220px;max-width:600px;width:96vw;position:relative;display:flex;flex-direction:row;gap:18px;align-items:flex-start;box-sizing:border-box;">
@@ -123,7 +182,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
 </div>
 
 <script>
-// Abrir modal e preencher campos
+
 document.querySelectorAll('.editar-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         document.getElementById('modal-editar').style.display = 'flex';
@@ -134,7 +193,7 @@ document.querySelectorAll('.editar-btn').forEach(btn => {
         document.getElementById('editar_nascimento').value = this.dataset.nascimento;
         document.getElementById('editar_endereco').value = this.dataset.endereco;
         document.getElementById('editar_tipo').value = this.dataset.tipo;
-        // Foco automático no campo Nome
+        
         setTimeout(function() {
             document.getElementById('editar_nome').focus();
         }, 100);
@@ -143,14 +202,14 @@ document.querySelectorAll('.editar-btn').forEach(btn => {
 document.getElementById('fechar-modal').onclick = function() {
     document.getElementById('modal-editar').style.display = 'none';
 };
-// Fechar modal ao clicar fora
+
 document.getElementById('modal-editar').onclick = function(e) {
     if (e.target === this) this.style.display = 'none';
 };
 </script>
 
 <?php
-// Processar edição
+
 if (isset($_POST['salvar_edicao'])) {
         $id = $_POST['editar_id'] ?? '';
         $nome = $_POST['editar_nome'] ?? '';
